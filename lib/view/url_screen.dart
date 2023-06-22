@@ -12,6 +12,11 @@ class UrlScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.green,
+        title: Text(
+          "URL SHORTENER",
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        ),
+        centerTitle: true,
       ),
       body: Consumer<UrlProvider>(builder: (context, urlClass, _) {
         return Padding(
