@@ -9,10 +9,11 @@ class UrlScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final FocusNode _focusNode = FocusNode();
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.green,
-        title: Text(
+        title: const Text(
           "URL SHORTENER",
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
@@ -26,20 +27,35 @@ class UrlScreen extends StatelessWidget {
             children: [
               TextFormField(
                 controller: urlClass.urlController,
-                decoration: const InputDecoration(
-                    border: OutlineInputBorder(),
-                    labelText: 'Enter the url here'),
+                decoration: InputDecoration(
+                    border: const OutlineInputBorder(),
+                    labelText: 'Enter the url here',
+                    suffixIcon: IconButton(
+                        onPressed: () async {
+                          var clipBoradData =
+                              await Clipboard.getData(Clipboard.kTextPlain);
+                          print(clipBoradData!.text);
+                          urlClass.urlController.text = clipBoradData.text!;
+                        },
+                        icon: const Icon(Icons.paste))),
               ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   ElevatedButton.icon(
                     onPressed: () async {
-                      const CircularProgressIndicator(
-                        strokeWidth: 2.0,
-                      );
+                      showDialog(
+                          context: context,
+                          builder: (context) => const Center(
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2.0,
+                                  backgroundColor: Colors.amber,
+                                ),
+                              ));
+
                       await urlShortener(urlClass.urlController.text)
                           .then((value) {
+                        // _focusNode.unfocus();
                         if (value == null) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
@@ -55,8 +71,10 @@ class UrlScreen extends StatelessWidget {
                           Navigator.of(context).pop();
                           return;
                         }
+                        Navigator.of(context).pop();
                         urlClass.resultController.text = value.url as String;
                       });
+                      _focusNode.unfocus();
                     },
                     icon: const Icon(Icons.settings_suggest_outlined),
                     label: const Text("Generate"),
@@ -73,9 +91,10 @@ class UrlScreen extends StatelessWidget {
               ),
               TextFormField(
                 controller: urlClass.resultController,
+                readOnly: true,
                 decoration: InputDecoration(
                     border: const OutlineInputBorder(),
-                    labelText: 'The result will be show here',
+                    labelText: 'The shortened URL will be show here',
                     suffixIcon: IconButton(
                       onPressed: () {
                         Clipboard.setData(ClipboardData(
